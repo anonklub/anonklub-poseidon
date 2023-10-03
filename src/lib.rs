@@ -1,39 +1,31 @@
 pub mod constants;
 pub mod sponge;
-pub mod traits;
 
-use crate::traits::PoseidonField;
-pub use halo2curves;
+use ark_ff::PrimeField;
 
 #[derive(Clone)]
-pub struct PoseidonConstants<F: PoseidonField> {
+pub struct PoseidonConstants<F: PrimeField> {
     pub round_keys: Vec<F>,
     pub mds_matrix: Vec<Vec<F>>,
     pub num_full_rounds: usize,
     pub num_partial_rounds: usize,
 }
 
-impl<F: PoseidonField> PoseidonConstants<F> {
-    pub fn new(width: usize) -> Self {
-        F::poseidon_constants(width)
-    }
-}
-
 const CAPACITY: usize = 1; // We fix the capacity to be one.
 
 #[derive(Clone)]
-pub struct Poseidon<F: PoseidonField, const WIDTH: usize> {
+pub struct Poseidon<F: PrimeField, const WIDTH: usize> {
     pub state: [F; WIDTH],
     pub constants: PoseidonConstants<F>,
     pub pos: usize,
 }
 
-impl<F: PoseidonField, const WIDTH: usize> Poseidon<F, WIDTH> {
-    pub fn new() -> Self {
+impl<F: PrimeField, const WIDTH: usize> Poseidon<F, WIDTH> {
+    pub fn new(constants: PoseidonConstants<F>) -> Self {
         let state = [F::zero(); WIDTH];
         Self {
             state,
-            constants: PoseidonConstants::new(WIDTH),
+            constants,
             pos: 0,
         }
     }

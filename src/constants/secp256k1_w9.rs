@@ -1,11 +1,11 @@
-use crate::traits::PoseidonField;
 use crate::PoseidonConstants;
+use ark_ff::PrimeField;
 
-// We dynamically set the constants for the secp256k1 curve instead a hardcoding for convenience.
-// Hardcoding requires us to use the `ark_ff::Fq` type, which
-// is hard to use in combination with other generic types.
+// We dynamically set the constants for the secp256k1 curve instead a hardcoding,
+// because hardcoding requires us to use the `ark_secp256k1::Fq` type, which
+// is hard to use in structs/functions defined with generic types.
 
-pub fn secp256k1_w9<F: PoseidonField>() -> PoseidonConstants<F> {
+pub fn secp256k1_w9<F: PrimeField>() -> PoseidonConstants<F> {
     let num_full_rounds = 8;
     let num_partial_rounds = 57;
 
@@ -112,7 +112,7 @@ pub fn secp256k1_w9<F: PoseidonField>() -> PoseidonConstants<F> {
     ]
     .iter()
     .map(|row| {
-        row.map(|val| F::from_str_vartime(val).unwrap())
+        row.map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
             .into_iter()
             .collect::<Vec<F>>()
     })
@@ -706,7 +706,7 @@ pub fn secp256k1_w9<F: PoseidonField>() -> PoseidonConstants<F> {
         "82683341424043500214290578093137562755993970033865668091281145539897825005511",
         "29540812940999143784033176633381086548318452359820266758685417823783830504448",
     ]
-    .map(|y| F::from_str_vartime(y).unwrap())
+    .map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
     .to_vec();
 
     PoseidonConstants {

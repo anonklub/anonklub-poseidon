@@ -1,5 +1,5 @@
-use crate::traits::PoseidonField;
-use crate::Poseidon;
+use crate::{Poseidon, PoseidonConstants};
+use ark_ff::PrimeField;
 use std::result::Result;
 use tiny_keccak::{Hasher, Keccak};
 
@@ -22,7 +22,7 @@ impl IOPattern {
 
 // Implements SAFE (Sponge API for Field Elements): https://hackmd.io/bHgsH6mMStCVibM_wYvb2w
 #[derive(Clone)]
-pub struct PoseidonSponge<F: PoseidonField, const W: usize> {
+pub struct PoseidonSponge<F: PrimeField, const W: usize> {
     pub absorb_pos: usize,
     pub squeeze_pos: usize,
     pub io_count: usize,
@@ -33,8 +33,12 @@ pub struct PoseidonSponge<F: PoseidonField, const W: usize> {
     poseidon: Poseidon<F, W>,
 }
 
-impl<F: PoseidonField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
-    pub fn new(domain_separator: &[u8], io_pattern: IOPattern) -> Self {
+impl<F: PrimeField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
+    pub fn new(
+        constants: PoseidonConstants<F>,
+        domain_separator: &[u8],
+        io_pattern: IOPattern,
+    ) -> Self {
         // Parse the constants from string
 
         let tag = Self::compute_tag(domain_separator, &io_pattern);
@@ -44,7 +48,7 @@ impl<F: PoseidonField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
 
         let rate = WIDTH - CAPACITY;
 
-        let mut poseidon = Poseidon::new();
+        let mut poseidon = Poseidon::new(constants);
         poseidon.state = state;
 
         Self {
@@ -114,7 +118,7 @@ impl<F: PoseidonField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
         // TODO: Support variable field size
         tag.extend_from_slice(&[0; 16]);
 
-        F::from_repr(tag.try_into().unwrap()).unwrap()
+        F::from_le_bytes_mod_order(&tag)
     }
 
     pub fn absorb(&mut self, x: &[F]) {
@@ -176,23 +180,26 @@ impl<F: PoseidonField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use halo2curves::group::ff::PrimeField;
-    use halo2curves::secp256k1::Fp;
+    use crate::constants::secp256k1_w9;
+    use std::str::FromStr;
+
+    type F = ark_secp256k1::Fq;
 
     const RATE: usize = 8;
     const WIDTH: usize = RATE + CAPACITY;
 
     #[test]
     fn test_poseidon_secp256k1() {
-        let input = (0..RATE).map(|i| Fp::from(i as u64)).collect::<Vec<Fp>>();
+        let input = (0..RATE).map(|i| F::from(i as u64)).collect::<Vec<F>>();
 
-        let mut sponge = PoseidonSponge::<Fp, WIDTH>::new(b"test", IOPattern(vec![]));
+        let constants = secp256k1_w9();
+        let mut sponge = PoseidonSponge::<F, WIDTH>::new(constants, b"test", IOPattern(vec![]));
         sponge.absorb(&input);
         let digest = sponge.squeeze(1)[0];
 
         assert_eq!(
             digest,
-            Fp::from_str_vartime(
+            F::from_str(
                 "70319031943286297975812718474954003309712593879219035486413267041586554011143"
             )
             .unwrap()
@@ -208,9 +215,10 @@ mod tests {
             SpongeOp::Squeeze(3),
         ]);
 
-        let inputs = vec![vec![Fp::from(1), Fp::from(2)], vec![Fp::from(3)]].concat();
+        let inputs = vec![vec![F::from(1), F::from(2)], vec![F::from(3)]].concat();
 
-        let mut sponge = PoseidonSponge::<Fp, WIDTH>::new(b"test", io_pattern.clone());
+        let constants = secp256k1_w9();
+        let mut sponge = PoseidonSponge::<F, WIDTH>::new(constants, b"test", io_pattern.clone());
 
         let mut input_position = 0;
         for op in io_pattern.0 {
