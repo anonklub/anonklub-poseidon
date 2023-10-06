@@ -8,4 +8,6 @@ edition = "2021"
 [dependencies]
 tiny-keccak = { version = "2.0.2", features = ["keccak"] }
 ark-ff = "0.4.2"
+
+[dev-dependencies]
 ark-secp256k1 = "0.4.0"
