@@ -1,10 +1,10 @@
 pub mod constants;
 pub mod sponge;
 
-use ark_ff::PrimeField;
+use ark_ff::Field;
 
 #[derive(Clone)]
-pub struct PoseidonConstants<F: PrimeField> {
+pub struct PoseidonConstants<F: Field> {
     pub round_keys: Vec<F>,
     pub mds_matrix: Vec<Vec<F>>,
     pub num_full_rounds: usize,
@@ -14,13 +14,13 @@ pub struct PoseidonConstants<F: PrimeField> {
 const CAPACITY: usize = 1; // We fix the capacity to be one.
 
 #[derive(Clone)]
-pub struct Poseidon<F: PrimeField, const WIDTH: usize> {
+pub struct Poseidon<F: Field, const WIDTH: usize> {
     pub state: [F; WIDTH],
     pub constants: PoseidonConstants<F>,
     pub pos: usize,
 }
 
-impl<F: PrimeField, const WIDTH: usize> Poseidon<F, WIDTH> {
+impl<F: Field, const WIDTH: usize> Poseidon<F, WIDTH> {
     pub fn new(constants: PoseidonConstants<F>) -> Self {
         let state = [F::zero(); WIDTH];
         Self {

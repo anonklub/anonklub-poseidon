@@ -1,5 +1,5 @@
 use crate::{Poseidon, PoseidonConstants};
-use ark_ff::PrimeField;
+use ark_ff::Field;
 use std::result::Result;
 use tiny_keccak::{Hasher, Keccak};
 
@@ -22,7 +22,7 @@ impl IOPattern {
 
 // Implements SAFE (Sponge API for Field Elements): https://hackmd.io/bHgsH6mMStCVibM_wYvb2w
 #[derive(Clone)]
-pub struct PoseidonSponge<F: PrimeField, const W: usize> {
+pub struct PoseidonSponge<F: Field, const W: usize> {
     pub absorb_pos: usize,
     pub squeeze_pos: usize,
     pub io_count: usize,
@@ -33,7 +33,7 @@ pub struct PoseidonSponge<F: PrimeField, const W: usize> {
     poseidon: Poseidon<F, W>,
 }
 
-impl<F: PrimeField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
+impl<F: Field, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
     pub fn new(
         constants: PoseidonConstants<F>,
         domain_separator: &[u8],
@@ -118,7 +118,7 @@ impl<F: PrimeField, const WIDTH: usize> PoseidonSponge<F, WIDTH> {
         // TODO: Support variable field size
         tag.extend_from_slice(&[0; 16]);
 
-        F::from_le_bytes_mod_order(&tag)
+        F::from_random_bytes(&tag).unwrap()
     }
 
     pub fn absorb(&mut self, x: &[F]) {

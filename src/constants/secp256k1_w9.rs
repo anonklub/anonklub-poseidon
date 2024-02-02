@@ -1,11 +1,13 @@
+use std::str::FromStr;
+
 use crate::PoseidonConstants;
-use ark_ff::PrimeField;
+use ark_ff::Field;
 
 // We dynamically set the constants for the secp256k1 curve instead a hardcoding,
 // because hardcoding requires us to use the `ark_secp256k1::Fq` type, which
 // is hard to use in structs/functions defined with generic types.
 
-pub fn secp256k1_w9<F: PrimeField>() -> PoseidonConstants<F> {
+pub fn secp256k1_w9<F: Field + FromStr>() -> PoseidonConstants<F> {
     let num_full_rounds = 8;
     let num_partial_rounds = 57;
 
