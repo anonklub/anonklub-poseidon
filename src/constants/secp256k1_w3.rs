@@ -1,13 +1,12 @@
-use std::str::FromStr;
-
 use crate::PoseidonConstants;
 use ark_ff::Field;
+use std::str::FromStr;
 
 // We dynamically set the constants for the secp256k1 curve instead a hardcoding,
 // because hardcoding requires us to use the `ark_secp256k1::Fq` type, which
 // is hard to use in structs/functions defined with generic types.
 
-pub fn secp256k1_w3<F: Field + FromStr>() -> PoseidonConstants<F> {
+pub fn secp256k1_w3<F: Field>() -> PoseidonConstants<F> {
     let num_full_rounds = 8;
     let num_partial_rounds = 56;
 
@@ -17,21 +16,36 @@ pub fn secp256k1_w3<F: Field + FromStr>() -> PoseidonConstants<F> {
             "100938028378191533449096235266991198229563815869344032449592738345766724371160",
             "77486311749148948616988559783475694076613010381924638436641318334458515006661",
         ]
-        .map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
+        .map(|val| {
+            F::from_base_prime_field(
+                F::BasePrimeField::from_str(val)
+                    .unwrap_or_else(|_| panic!("Failed to parse constants")),
+            )
+        })
         .to_vec(),
         [
             "110352262556914082363749654180080464794716701228558638957603951672835474954408",
             "27607004873684391669404739690441550149894883072418944161048725383958774443141",
             "29671705769502357195586268679831947082918094959101307962374709600277676341325",
         ]
-        .map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
+        .map(|val| {
+            F::from_base_prime_field(
+                F::BasePrimeField::from_str(val)
+                    .unwrap_or_else(|_| panic!("Failed to parse constants")),
+            )
+        })
         .to_vec(),
         [
             "77762103796341032609398578911486222569419103128091016773380377798879650228751",
             "1753012011204964731088925227042671869111026487299375073665493007998674391999",
             "70274477372358662369456035572054501601454406272695978931839980644925236550307",
         ]
-        .map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
+        .map(|val| {
+            F::from_base_prime_field(
+                F::BasePrimeField::from_str(val)
+                    .unwrap_or_else(|_| panic!("Failed to parse constants")),
+            )
+        })
         .to_vec(),
     ];
 
@@ -229,7 +243,12 @@ pub fn secp256k1_w3<F: Field + FromStr>() -> PoseidonConstants<F> {
         "28438981751956157476540225984733791304599172905715743025543841239013139121102",
         "56066317647068426981453448715118237747130321302262827290362392918472904421147",
     ]
-    .map(|val| F::from_str(val).unwrap_or_else(|_| panic!("Failed to parse constants")))
+    .map(|val| {
+        F::from_base_prime_field(
+            F::BasePrimeField::from_str(val)
+                .unwrap_or_else(|_| panic!("Failed to parse constants")),
+        )
+    })
     .to_vec();
 
     PoseidonConstants {
