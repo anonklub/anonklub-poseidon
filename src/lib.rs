@@ -2,8 +2,9 @@ pub mod constants;
 pub mod sponge;
 
 use ark_ff::Field;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
-#[derive(Clone)]
+#[derive(Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct PoseidonConstants<F: Field> {
     pub round_keys: Vec<F>,
     pub mds_matrix: Vec<Vec<F>>,
@@ -13,7 +14,7 @@ pub struct PoseidonConstants<F: Field> {
 
 const CAPACITY: usize = 1; // We fix the capacity to be one.
 
-#[derive(Clone)]
+#[derive(Clone, CanonicalDeserialize, CanonicalSerialize)]
 pub struct Poseidon<F: Field, const WIDTH: usize> {
     pub state: [F; WIDTH],
     pub constants: PoseidonConstants<F>,
