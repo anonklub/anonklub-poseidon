@@ -1,10 +1,10 @@
 [package]
 name = "anonklub-poseidon"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 license="AGPL-3.0"
 authors=["DanTehrani"]
-repository="https://github.com/personaelabs/poseidon"
+repository="https://github.com/anonklub/poseidon"
 description = "Poseidon hash"
 
 [dependencies]
